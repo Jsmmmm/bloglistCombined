@@ -5,6 +5,7 @@ import {
 } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { Container, AppBar, Toolbar, Button } from '@mui/material'
+import useBlogStore from './stores/blogStore'
 import Blog from './components/Blog'
 import Blogs from './components/Blogs'
 import BlogPage from './components/BlogPage'
@@ -19,8 +20,13 @@ import loginService from './services/login'
 import './index.css'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
+
   const [user, setUser] = useState(null)
+  const blogs = useBlogStore(state => state.blogs)
+
+  const fetchBlogs = useBlogStore(
+    state => state.fetchBlogs
+  )
 
   const setNotification = useNotificationStore(
     state => state.setNotification
@@ -29,9 +35,7 @@ const App = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )  
+    fetchBlogs()
   }, [])
 
   useEffect(() => {
@@ -42,6 +46,7 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
 
   const handleLogin = async ({ username, password }) => {
     try {
@@ -63,50 +68,6 @@ const App = () => {
     setUser(null)
     setNotification('Logged out', 'success' )
   }
-
-  const handleBlogSubmit = async ({ title, author, url }) => {
-  try {
-    const newBlog = await blogService.create({ title, author, url })
-    
-    // add the new blog to state
-    setBlogs(blogs.concat(newBlog))
-    setNotification('Added new blog', 'success' )
-  } catch {
-    setNotification('error creating blog', 'error' )
-      console.log('error creating blog')
-  }
-}
-
-const handleBlogLike = async (blog) => {
-  try {
-    const updatedBlog = await blogService.like(blog.id)
-
-    setBlogs(prev =>
-      prev.map(b => b.id === blog.id ? updatedBlog : b)
-    )
-
-    return updatedBlog // 👈 important
-  } catch {
-    setNotification('error liking blog', 'error' )
-    return null
-  }
-}
-
-const handleBlogDelete = async (blog) => {
-  try {
-    await blogService.remove(blog.id)
-
-    setBlogs(prevBlogs =>
-      prevBlogs.filter(b => b.id !== blog.id)
-    )
-
-    setNotification('Blog removed', 'success')
-    navigate('/blogs')
-
-  } catch {
-    setNotification('error deleting blog', 'error')
-  }
-}
 
   const padding = {
     padding: 5
@@ -133,12 +94,7 @@ const handleBlogDelete = async (blog) => {
         </div>
         <Routes>
           <Route path="/blogs" element={
-            <Blogs 
-              blogs={blogs}
-              user={user}
-              onLike={handleBlogLike}
-              onDelete={handleBlogDelete}
-            />
+            <Blogs blogs={blogs} user={user}/>
           } />
           <Route path="/login" element={
             <LoginForm onLogin={handleLogin}/> 
@@ -146,18 +102,16 @@ const handleBlogDelete = async (blog) => {
           <Route path="/" element={<Blogs blogs={blogs} />} />
 
           <Route path="/blogs/:id" element={
-            <BlogPage 
-              user={user}
-              onLike={handleBlogLike}
-              onDelete={handleBlogDelete}
-            />
+            <BlogPage user={user} />
           } />
 
-          <Route path="/blogs/new" element={
-            user 
-              ? <NewBlogPage onCreate={handleBlogSubmit} />
-              : <LoginForm onLogin={handleLogin} />
-          } />
+          <Route
+            path="/blogs/new" element={
+              user
+                ? <NewBlogPage />
+                : <LoginForm onLogin={handleLogin} />
+            }
+          />
 
         </Routes>
         <div>

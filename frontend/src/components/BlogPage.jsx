@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import blogService from '../services/blogs'
+import useBlogStore from '../stores/blogStore'
+import useNotificationStore from '../stores/notificationStore'
 
 import {
   Container,
@@ -13,13 +13,16 @@ import {
   Box
 } from '@mui/material'
 
-const BlogPage = ({ onLike, onDelete, user }) => {
+const BlogPage = ({ user }) => {
   const { id } = useParams()
-  const [blog, setBlog] = useState(null)
 
-  useEffect(() => {
-    blogService.getById(id).then(setBlog)
-  }, [id])
+  const blog = useBlogStore(state =>
+    state.blogs.find(b => b.id === id)
+  )
+
+  const likeBlog = useBlogStore(state => state.likeBlog)
+  const deleteBlog = useBlogStore(state => state.deleteBlog)
+  const setNotification = useNotificationStore(state => state.setNotification)
 
   if (!blog) return <Container>Blog not found</Container>
 
@@ -28,13 +31,28 @@ const BlogPage = ({ onLike, onDelete, user }) => {
     blog.user &&
     (user.id === blog.user.toString?.() || user.id === blog.user.id)
 
+  const handleLike = async () => {
+    try {
+      await likeBlog(blog.id)
+    } catch {
+      setNotification('error liking blog', 'error')
+    }
+  }
+
+  const handleDelete = async () => {
+    try {
+      await deleteBlog(blog.id)
+      setNotification('Blog removed', 'success')
+    } catch {
+      setNotification('error deleting blog', 'error')
+    }
+  }
+
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Card elevation={3}>
         <CardContent>
-          <Typography variant="h4" gutterBottom>
-            {blog.title}
-          </Typography>
+          <Typography variant="h4">{blog.title}</Typography>
 
           <Typography variant="subtitle1" color="text.secondary">
             by {blog.author}
@@ -47,23 +65,13 @@ const BlogPage = ({ onLike, onDelete, user }) => {
           </Box>
 
           <Box sx={{ mt: 3 }}>
-            <Typography variant="body1">
-              Likes: {blog.likes}
-            </Typography>
+            <Typography>Likes: {blog.likes}</Typography>
           </Box>
         </CardContent>
 
         <CardActions sx={{ px: 2, pb: 2 }}>
           {user && (
-            <Button
-              variant="contained"
-              size="small"
-              onClick={async () => {
-                await onLike(blog)
-                const refreshed = await blogService.getById(blog.id)
-                setBlog(refreshed)
-              }}
-            >
+            <Button variant="contained" size="small" onClick={handleLike}>
               Like
             </Button>
           )}
@@ -73,7 +81,7 @@ const BlogPage = ({ onLike, onDelete, user }) => {
               variant="outlined"
               color="error"
               size="small"
-              onClick={() => onDelete(blog)}
+              onClick={handleDelete}
             >
               Remove
             </Button>
