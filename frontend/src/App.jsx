@@ -12,6 +12,7 @@ import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import NewBlogPage from './components/NewBlogPage'
 import Notification from './components/Notification'
+import useNotificationStore from './stores/notificationStore'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -20,7 +21,10 @@ import './index.css'
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
-  const [notification, setNotification] = useState(null)
+
+  const setNotification = useNotificationStore(
+    state => state.setNotification
+  )
 
   const navigate = useNavigate()
 
@@ -49,11 +53,7 @@ const App = () => {
       setUser(user)
       navigate('/')
     } catch {
-      setNotification({ message: 'wrong credentials', type: 'error' })
-      console.log('wrong credentials')
-      setTimeout(() => {
-        setNotification(null)
-      }, 5000)
+      setNotification( 'wrong credentials','error' )
     }
   }
 
@@ -61,10 +61,7 @@ const App = () => {
     window.localStorage.removeItem('loggedBlogAppUser')
     blogService.setToken(null)
     setUser(null)
-    setNotification({ message: 'Logged out', type: 'success' })
-    setTimeout(() => {
-        setNotification(null)
-      }, 5000)
+    setNotification('Logged out', 'success' )
   }
 
   const handleBlogSubmit = async ({ title, author, url }) => {
@@ -73,16 +70,10 @@ const App = () => {
     
     // add the new blog to state
     setBlogs(blogs.concat(newBlog))
-    setNotification({ message: 'Added new blog', type: 'success' })
-    setTimeout(() => {
-        setNotification(null)
-      }, 5000)
+    setNotification('Added new blog', 'success' )
   } catch {
-    setNotification({ message: 'error creating blog', type: 'error' })
+    setNotification('error creating blog', 'error' )
       console.log('error creating blog')
-      setTimeout(() => {
-        setNotification(null)
-      }, 5000)
   }
 }
 
@@ -96,8 +87,7 @@ const handleBlogLike = async (blog) => {
 
     return updatedBlog // 👈 important
   } catch {
-    setNotification({ message: 'error liking blog', type: 'error' })
-    setTimeout(() => setNotification(null), 5000)
+    setNotification('error liking blog', 'error' )
     return null
   }
 }
@@ -110,13 +100,11 @@ const handleBlogDelete = async (blog) => {
       prevBlogs.filter(b => b.id !== blog.id)
     )
 
-    setNotification({ message: 'Blog removed', type: 'success' })
-    setTimeout(() => setNotification(null), 5000)
+    setNotification('Blog removed', 'success')
     navigate('/blogs')
 
   } catch {
-    setNotification({ message: 'error deleting blog', type: 'error' })
-    setTimeout(() => setNotification(null), 5000)
+    setNotification('error deleting blog', 'error')
   }
 }
 
@@ -173,7 +161,7 @@ const handleBlogDelete = async (blog) => {
 
         </Routes>
         <div>
-          <Notification message={notification?.message} type={notification?.type} />
+          <Notification />
           
           {user && (
             <div>
