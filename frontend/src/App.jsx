@@ -6,15 +6,12 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { Container, AppBar, Toolbar, Button } from '@mui/material'
 import useBlogStore from './stores/blogStore'
-import Blog from './components/Blog'
 import Blogs from './components/Blogs'
 import BlogPage from './components/BlogPage'
 import LoginForm from './components/LoginForm'
-import BlogForm from './components/BlogForm'
 import NewBlogPage from './components/NewBlogPage'
 import Notification from './components/Notification'
 import useNotificationStore from './stores/notificationStore'
-import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import './index.css'
@@ -94,7 +91,7 @@ const App = () => {
         </div>
         <Routes>
           <Route path="/blogs" element={
-            <Blogs blogs={blogs} user={user}/>
+            <Blogs blogs={blogs}/>
           } />
           <Route path="/login" element={
             <LoginForm onLogin={handleLogin}/> 
@@ -102,7 +99,7 @@ const App = () => {
           <Route path="/" element={<Blogs blogs={blogs} />} />
 
           <Route path="/blogs/:id" element={
-            <BlogPage user={user} />
+            <BlogPage user={user}/>
           } />
 
           <Route
