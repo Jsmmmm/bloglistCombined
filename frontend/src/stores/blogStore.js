@@ -5,6 +5,11 @@ const useBlogStore = create((set) => ({
 
   blogs: [],
 
+  initBlogs: async () => {
+    const blogs = await blogService.getAll()
+    set({ blogs })
+  },
+
   fetchBlogs: async () => {
     const blogs = await blogService.getAll()
     set({ blogs })

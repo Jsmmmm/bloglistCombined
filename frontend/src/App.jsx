@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import {
   BrowserRouter as Router,
   Routes, Route, Link
@@ -12,58 +12,47 @@ import LoginForm from './components/LoginForm'
 import NewBlogPage from './components/NewBlogPage'
 import Notification from './components/Notification'
 import useNotificationStore from './stores/notificationStore'
-import blogService from './services/blogs'
-import loginService from './services/login'
 import './index.css'
+import useUserStore from './stores/userStore'
 
 const App = () => {
-
-  const [user, setUser] = useState(null)
+  
   const blogs = useBlogStore(state => state.blogs)
+  const initBlogs = useBlogStore(state => state.initBlogs)
 
-  const fetchBlogs = useBlogStore(
-    state => state.fetchBlogs
-  )
+  const user = useUserStore(state => state.user)
+  const login = useUserStore(state => state.login)
+  const logout = useUserStore(state => state.logout)
+  const initUser = useUserStore(state => state.initUser)
 
-  const setNotification = useNotificationStore(
-    state => state.setNotification
-  )
+  const setNotification = useNotificationStore(state => state.setNotification)
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    fetchBlogs()
+    initBlogs()
   }, [])
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
-    }
+    initUser()
   }, [])
 
 
   const handleLogin = async ({ username, password }) => {
     try {
-      const user = await loginService.login({ username, password })
-      window.localStorage.setItem(
-        'loggedBlogAppUser', JSON.stringify(user)
-      ) 
-      blogService.setToken(user.token)
-      setUser(user)
+      await login({ username, password })
       navigate('/')
-    } catch {
-      setNotification( 'wrong credentials','error' )
+    } catch (error) {
+      setNotification(
+        error.response?.data?.error || 'wrong credentials',
+        'error'
+      )
     }
   }
 
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedBlogAppUser')
-    blogService.setToken(null)
-    setUser(null)
-    setNotification('Logged out', 'success' )
+    logout()
+    setNotification('Logged out', 'success')
   }
 
   const padding = {
@@ -109,7 +98,6 @@ const App = () => {
                 : <LoginForm onLogin={handleLogin} />
             }
           />
-
         </Routes>
         <div>
           <Notification />
