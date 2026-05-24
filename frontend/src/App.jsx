@@ -8,6 +8,7 @@ import { Container, AppBar, Toolbar, Button } from '@mui/material'
 import useBlogStore from './stores/blogStore'
 import Blogs from './components/Blogs'
 import BlogPage from './components/BlogPage'
+import UsersPage from './components/UsersPage'
 import LoginForm from './components/LoginForm'
 import NewBlogPage from './components/NewBlogPage'
 import Notification from './components/Notification'
@@ -68,6 +69,7 @@ const App = () => {
           <AppBar position="static">
             <Toolbar>
               <Button color="inherit"  component={Link} to="/blogs" sx={style}>Blogs</Button>
+              <Button color="inherit"  component={Link} to="/users" sx={style}>Users</Button>
               <Button color="inherit"  component={Link} to="/blogs/new" sx={style}>New Blog</Button>
               {!user && (
                 <Button color="inherit" component={Link} to="/login" sx={style}>Login</Button>
@@ -98,6 +100,9 @@ const App = () => {
                 : <LoginForm onLogin={handleLogin} />
             }
           />
+          <Route path="/users/" element={
+            <UsersPage/>
+          } />
         </Routes>
         <div>
           <Notification />
