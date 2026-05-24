@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import userService from '../services/users'
 
 import {
@@ -49,8 +50,11 @@ const UsersPage = () => {
 
           <TableBody>
             {users.map(user => (
+              
               <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
+                <TableCell>
+                  <Link to={`/users/${user.id}`}>{user.name}</Link>
+                </TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>{user.blogs.length}</TableCell>
               </TableRow>

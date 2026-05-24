@@ -9,6 +9,7 @@ import useBlogStore from './stores/blogStore'
 import Blogs from './components/Blogs'
 import BlogPage from './components/BlogPage'
 import UsersPage from './components/UsersPage'
+import UserPage from './components/UserPage'
 import LoginForm from './components/LoginForm'
 import NewBlogPage from './components/NewBlogPage'
 import Notification from './components/Notification'
@@ -102,6 +103,9 @@ const App = () => {
           />
           <Route path="/users/" element={
             <UsersPage/>
+          } />
+          <Route path="/users/:id" element={
+            <UserPage/>
           } />
         </Routes>
         <div>
