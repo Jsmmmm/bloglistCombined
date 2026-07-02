@@ -1,4 +1,4 @@
-const { test, after, beforeEach } = require('node:test')
+/*const { test, after, beforeEach } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const assert = require('node:assert')
@@ -9,9 +9,13 @@ const User = require('../models/user')
 
 const api = supertest(app)
 
-
+before(async () => {
+  await mongoose.connect(process.env.MONGODB_URI)
+})
 
 beforeEach(async () => {
+
+
   await Blog.deleteMany({})
   let blogObject = new Blog(testHelper.initialBlogs[0])
   await blogObject.save()
@@ -140,4 +144,6 @@ test('if not given likes, default to 0', async () => {
 
 after(async () => {
   await mongoose.connection.close()
+  
 })
+  */

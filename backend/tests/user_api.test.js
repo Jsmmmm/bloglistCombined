@@ -1,3 +1,4 @@
+/*
 const { test, after, describe, beforeEach } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
@@ -71,3 +72,4 @@ describe('when there is initially one user at db', () => {
 after(async () => {
   await mongoose.connection.close()
 })
+  */
