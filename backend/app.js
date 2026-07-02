@@ -1,5 +1,6 @@
 const express = require('express')
 const mongoose = require('mongoose')
+const path = require('path')
 const config = require('./utils/config')
 const middleware = require('./utils/middleware')
 const blogsRouter = require('./controllers/blogs')
@@ -17,12 +18,8 @@ mongoose
     logger.info('connected to MongoDB')
   })
   .catch((error) => {
-    logger.error('error connection to MongoDB:', error.message)
+    logger.error('error connecting to MongoDB:', error.message)
   })
-
-app.get('/', (request, response) => {
-  response.send('<h1>Hello World!</h1>')
-})
 
 app.use(express.json())
 
@@ -39,11 +36,16 @@ if (process.env.NODE_ENV === 'test') {
   app.use('/api/testing', testingRouter)
 }
 
+// Serve the React app only in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'public')))
+
+  app.get(/^(?!\/api).*/, (request, response) => {
+    response.sendFile(path.join(__dirname, 'public', 'index.html'))
+  })
+}
+
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
-
 module.exports = app
-
-
-
