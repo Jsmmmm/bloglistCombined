@@ -1,13 +1,18 @@
 {
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
-    "build": "npm run build --prefix frontend && npm run build --prefix backend",
-    "install-all": "npm install --prefix frontend && npm install --prefix backend"
+    "install-all": "npm install && npm install --prefix frontend && npm install --prefix backend",
+    "test": "npm test --prefix backend && npm test --prefix frontend",
+    "lint": "npm run lint --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
   },
   "dependencies": {
-    "zustand": "^5.0.13"
+    "zustand": "^5.0.13",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }
+

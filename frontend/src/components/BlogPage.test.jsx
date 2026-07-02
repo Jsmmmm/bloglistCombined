@@ -1,67 +1,73 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
 import BlogPage from './BlogPage'
-import blogService from '../services/blogs'
 
-// mock useParams
+// mock react-router-dom
 vi.mock('react-router-dom', () => ({
   useParams: () => ({ id: '123' })
 }))
 
-// mock blogService
-vi.mock('../services/blogs')
+// mock Zustand stores
+const mockLikeBlog = vi.fn()
+const mockDeleteBlog = vi.fn()
+const mockAddComment = vi.fn()
+const mockSetNotification = vi.fn()
 
-const mockBlog = {
-  id: '123',
-  title: 'Test Blog',
-  author: 'John Doe',
-  url: 'http://example.com',
-  likes: 5,
-  user: {
-    username: 'john'
-  }
-}
+vi.mock('../stores/blogStore', () => ({
+  default: (selector) =>
+    selector({
+      blogs: [
+        {
+          id: '123',
+          title: 'Test Blog',
+          author: 'John Doe',
+          url: 'http://example.com',
+          likes: 5,
+          comments: [],
+          user: { id: 'john-id', username: 'john' }
+        }
+      ],
+      likeBlog: mockLikeBlog,
+      deleteBlog: mockDeleteBlog,
+      addComment: mockAddComment
+    })
+}))
+
+vi.mock('../stores/notificationStore', () => ({
+  default: (selector) =>
+    selector({
+      setNotification: mockSetNotification
+    })
+}))
 
 describe('BlogPage', () => {
-  beforeEach(() => {
-    blogService.getById.mockResolvedValue(mockBlog)
-  })
+  test('1. shows blog info but no buttons when user not logged in', () => {
+    render(<BlogPage user={null} />)
 
-  test('1. shows blog info but no buttons when user not logged in', async () => {
-    render(<BlogPage user={null} onLike={vi.fn()} onDelete={vi.fn()} />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Test Blog')).toBeInTheDocument()
-    })
-
-    expect(screen.getByText('John Doe')).toBeInTheDocument()
+    expect(screen.getByText('Test Blog')).toBeInTheDocument()
+    expect(screen.getByText('by John Doe')).toBeInTheDocument()
     expect(screen.getByText('http://example.com')).toBeInTheDocument()
-    expect(screen.getByText('5')).toBeInTheDocument()
+    expect(screen.getByText('Likes: 5')).toBeInTheDocument()
 
-    // buttons should NOT exist
-    expect(screen.queryByText('like')).toBeNull()
-    expect(screen.queryByText('remove')).toBeNull()
+    expect(screen.queryByText('Like')).toBeNull()
+    expect(screen.queryByText('Remove')).toBeNull()
   })
 
-  test('2. logged in user sees like button', async () => {
-    const user = { username: 'someone' }
+  test('2. logged in user sees like button', () => {
+    const user = { id: 'someone' }
 
-    render(<BlogPage user={user} onLike={vi.fn()} onDelete={vi.fn()} />)
+    render(<BlogPage user={user} />)
 
-    await screen.findByText('Test Blog')
-
-    expect(screen.getByText('like')).toBeInTheDocument()
-    expect(screen.queryByText('remove')).toBeNull()
+    expect(screen.getByText('Like')).toBeInTheDocument()
+    expect(screen.queryByText('Remove')).toBeNull()
   })
 
-  test('3. blog creator sees remove button', async () => {
-    const user = { username: 'john' } // same as blog.user.username
+  test('3. blog creator sees remove button', () => {
+    const user = { id: 'john-id' }
 
-    render(<BlogPage user={user} onLike={vi.fn()} onDelete={vi.fn()} />)
+    render(<BlogPage user={user} />)
 
-    await screen.findByText('Test Blog')
-
-    expect(screen.getByText('like')).toBeInTheDocument()
-    expect(screen.getByText('remove')).toBeInTheDocument()
+    expect(screen.getByText('Like')).toBeInTheDocument()
+    expect(screen.getByText('Remove')).toBeInTheDocument()
   })
 })

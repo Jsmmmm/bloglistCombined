@@ -20,7 +20,7 @@ const BlogForm = ({ onCreate }) => {
       <form onSubmit={handleSubmit}>
         <div>
           <TextField
-            label="Title"
+            label="title"
             variant="outlined"
             //fullWidth
             value={title}
